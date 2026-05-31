@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Mẫu</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .hidden { display: none; }
+        .tabs { display: flex; margin-bottom: 20px; }
+        .tab { flex: 1; padding: 10px; text-align: center; background: #ddd; cursor: pointer; font-weight: bold; }
+        .tab.active { background: #007bff; color: white; }
+        .grid-numbers { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; margin-top: 10px; }
+        .number-btn { padding: 8px; text-align: center; background: #eee; border: 1px solid #ccc; cursor: pointer; border-radius: 4px; }
+        .number-btn.selected { background: #28a745; color: white; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="number"], input[type="password"] { width: 100%; padding: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #0056b3; }
+        .user-info { display: flex; justify-content: space-between; background: #e9ecef; padding: 10px; border-radius: 4px; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 1. ĐĂNG KÝ / ĐĂNG NHẬP -->
+    <div id="auth-box">
+        <h2>Đăng Nhập / Đăng Ký</h2>
+        <div class="form-group">
+            <label>Tên tài khoản:</label>
+            <input type="text" id="username" placeholder="Nhập tài khoản...">
+        </div>
+        <div class="form-group">
+            <label>Mật khẩu:</label>
+            <input type="password" id="password" placeholder="Nhập mật khẩu...">
+        </div>
+        <button onclick="login()">Vào Hệ Thống</button>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="app-box" class="hidden">
+        <div class="user-info">
+            <span>Xin chào: <strong id="user-display"></strong></span>
+            <span>Số dư: <strong id="balance-display" style="color: red;">0</strong> VNĐ</span>
+        </div>
+
+        <!-- Các Tab Chức Năng -->
+        <div class="tabs">
+            <div class="tab active" id="tab1-header" onclick="switchTab('tab1')">Lô</div>
+            <div class="tab" id="tab2-header" onclick="switchTab('tab2')">Đề</div>
+            <div class="tab" onclick="switchTab('nap_tien')">Nạp Tiền</div>
+            <div class="tab" onclick="switchTab('nhan_tien')">Nhận Tiền</div>
+        </div>
+
+        <!-- Cấu hình đổi tên tab (Chỉ demo trực quan) -->
+        <div style="margin-bottom: 15px; background: #fff3cd; padding: 8px; border-radius: 4px; font-size: 13px;">
+            Đổi tên nhanh Tab: 
+            <input type="text" id="rename-tab1" placeholder="Tên Tab 1" style="width:30%; display:inline;" oninput="renameTabs()">
+            <input type="text" id="rename-tab2" placeholder="Tên Tab 2" style="width:30%; display:inline;" oninput="renameTabs()">
+        </div>
+
+        <!-- Tab 1 & Tab 2 (Mua Số) -->
+        <div id="tab-content-game">
+            <h3 id="current-game-title">Chọn số để mua</h3>
+            <div class="form-group">
+                <label>Nhập số tiền muốn đặt cho mỗi số (VNĐ):</label>
+                <input type="number" id="bet-amount" placeholder="Ví dụ: 10000" min="1000">
+            </div>
+            <label>Chọn các số (01 - 99):</label>
+            <div class="grid-numbers" id="numbers-container"></div>
+            <button style="margin-top: 15px; background: #28a745;" onclick="submitBet()">Xác Nhận Mua Số</button>
+        </div>
+
+        <!-- Tab Nạp Tiền -->
+        <div id="tab-content-nap" class="hidden">
+            <h3>Yêu cầu Nạp Tiền</h3>
+            <p style="font-size: 14px; color: #666;">Sau khi gửi yêu cầu, hãy liên hệ admin để được duyệt.</p>
+            <div class="form-group">
+                <label>Số tiền muốn nạp:</label>
+                <input type="number" id="deposit-amount" placeholder="Nhập số tiền...">
+            </div>
+            <button onclick="submitDeposit()">Gửi Yêu Cầu Nạp</button>
+        </div>
+
+        <!-- Tab Nhận Tiền (Rút Tiền) -->
+        <div id="tab-content-rut" class="hidden">
+            <h3>Yêu cầu Nhận Tiền (Rút về STK)</h3>
+            <div class="form-group">
+                <label>Tên Ngân Hàng:</label>
+                <input type="text" id="withdraw-bank" placeholder="Ví dụ: Vietcombank, MB...">
+            </div>
+            <div class="form-group">
+                <label>Số Tài Khoản (STK):</label>
+                <input type="text" id="withdraw-stk" placeholder="Nhập số tài khoản...">
+            </div>
+            <div class="form-group">
+                <label>Số tiền muốn nhận:</label>
+                <input type="number" id="withdraw-amount" placeholder="Nhập số tiền...">
+            </div>
+            <button style="background: #dc3545;" onclick="submitWithdraw()">Gửi Yêu Cầu Rút</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentUser = "";
+    let selectedNumbers = [];
+    let currentTab = "tab1";
+
+    // Khởi tạo bảng số từ 01 đến 99
+    const container = document.getElementById('numbers-container');
+    for (let i = 1; i <= 99; i++) {
+        let numStr = i < 10 ? '0' + i : i;
+        let btn = document.createElement('div');
+        btn.className = 'number-btn';
+        btn.innerText = numStr;
+        btn.onclick = () => toggleNumber(btn, numStr);
+        container.appendChild(btn);
+    }
+
+    function toggleNumber(btn, num) {
+        if (selectedNumbers.includes(num)) {
+            selectedNumbers = selectedNumbers.filter(n => n !== num);
+            btn.classList.remove('selected');
+        } else {
+            selectedNumbers.push(num);
+            btn.classList.add('selected');
+        }
+    }
+
+    // Đổi tên tab
+    function renameTabs() {
+        let t1 = document.getElementById('rename-tab1').value || "Lô";
+        let t2 = document.getElementById('rename-tab2').value || "Đề";
+        document.getElementById('tab1-header').innerText = t1;
+        document.getElementById('tab2-header').innerText = t2;
+        if(currentTab === 'tab1') document.getElementById('current-game-title').innerText = "Đang chọn: " + t1;
+        if(currentTab === 'tab2') document.getElementById('current-game-title').innerText = "Đang chọn: " + t2;
+    }
+
+    // Chuyển Đổi Các Tab Giao Diện
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-content-game').classList.add('hidden');
+        document.getElementById('tab-content-nap').classList.add('hidden');
+        document.getElementById('tab-content-rut').classList.add('hidden');
+
+        if (tabName === 'tab1' || tabName === 'tab2') {
+            currentTab = tabName;
+            document.getElementById(tabName + '-header').classList.add('active');
+            document.getElementById('tab-content-game').classList.remove('hidden');
+            renameTabs();
+        } else if (tabName === 'nap_tien') {
+            document.getElementById('tab-content-nap').classList.remove('hidden');
+        } else if (tabName === 'nhan_tien') {
+            document.getElementById('tab-content-rut').classList.remove('hidden');
+        }
+    }
+
+    // Đăng nhập giả lập
+    function login() {
+        let user = document.getElementById('username').value.trim();
+        if(!user) return alert("Vui lòng nhập tên tài khoản");
+        currentUser = user;
+        
+        // Khởi tạo ví tiền nếu chưa có
+        if(!localStorage.getItem('bal_' + user)) localStorage.setItem('bal_' + user, '0');
+        
+        document.getElementById('auth-box').classList.add('hidden');
+        document.getElementById('app-box').classList.remove('hidden');
+        document.getElementById('user-display').innerText = currentUser;
+        updateBalanceView();
+    }
+
+    function updateBalanceView() {
+        document.getElementById('balance-display').innerText = parseInt(localStorage.getItem('bal_' + currentUser)).toLocaleString();
+    }
+
+    // Đẩy thông báo lên hệ thống trung gian (dùng tạm LocalStorage để kết nối 2 file)
+    function sendNotification(data) {
+        let list = JSON.parse(localStorage.getItem('admin_notifs') || '[]');
+        list.push(data);
+        localStorage.setItem('admin_notifs', JSON.stringify(list));
+    }
+
+    // Hành động: Mua số
+    function submitBet() {
+        let money = document.getElementById('bet-amount').value;
+        if(selectedNumbers.length === 0 || !money) return alert("Vui lòng chọn số và điền số tiền!");
+        
+        let totalCost = money * selectedNumbers.length;
+        let currentBal = parseInt(localStorage.getItem('bal_' + currentUser));
+        if(currentBal < totalCost) return alert("Tài khoản của bạn không đủ tiền!");
+
+        // Trừ tiền tài khoản ngay khi mua
+        localStorage.setItem('bal_' + currentUser, currentBal - totalCost);
+        updateBalanceView();
+
+        let tabNameCurrent = document.getElementById(currentTab + '-header').innerText;
+        sendNotification({
+            type: 'MUA_SO', user: currentUser, tab: tabNameCurrent, numbers: selectedNumbers.join(', '), money: money, total: totalCost, time: new Date().toLocaleTimeString()
+        });
+        alert("Đặt cược thành công! Chờ Admin phê duyệt.");
+        // Reset lựa chọn
+        selectedNumbers = [];
+        document.querySelectorAll('.number-btn').forEach(b => b.classList.remove('selected'));
+    }
+
+    // Hành động: Gửi yêu cầu Nạp Tiền
+    function submitDeposit() {
+        let money = document.getElementById('deposit-amount').value;
+        if(!money || money <= 0) return alert("Số tiền không hợp lệ");
+        sendNotification({
+            type: 'NAP_TIEN', user: currentUser, money: money, time: new Date().toLocaleTimeString()
+        });
+        alert("Đã gửi yêu cầu nạp tiền lên Admin!");
+    }
+
+    // Hành động: Gửi yêu cầu Nhận tiền (Rút)
+    function submitWithdraw() {
+        let bank = document.getElementById('withdraw-bank').value;
+        let stk = document.getElementById('withdraw-stk').value;
+        let money = document.getElementById('withdraw-amount').value;
+        if(!bank || !stk || !money || money <= 0) return alert("Vui lòng nhập đầy đủ thông tin");
+
+        sendNotification({
+            type: 'RUT_TIEN', user: currentUser, bank: bank, stk: stk, money: money, time: new Date().toLocaleTimeString()
+        });
+        alert("Đã gửi yêu cầu rút tiền lên Admin!");
+    }
+</script>
+</body>
+</html>
