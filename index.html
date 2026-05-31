@@ -3,143 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Shop Cao Cấp</title>
+    <title>Hệ Thống Shop Vip - Giao Diện Mới</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        :root { --primary: #4f46e5; --success: #10b981; --danger: #ef4444; --bg: #f3f4f6; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1f2937; }
-        .container { max-width: 550px; margin: 30px auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
-        h3 { margin-top: 0; color: #111827; border-left: 4px solid var(--primary); padding-left: 10px; }
+        :root { --primary: #3b82f6; --success: #10b981; --danger: #ef4444; --dark: #1e293b; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f1f5f9; margin: 0; padding: 20px; color: #334155; }
+        .container { max-width: 550px; margin: 20px auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .form-header { text-align: center; margin-bottom: 25px; }
+        .form-header h2 { margin: 0; color: var(--dark); font-size: 24px; }
         .form-group { margin-bottom: 18px; }
-        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 14px; }
-        .form-group input { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; font-size: 15px; transition: 0.2s; }
-        .form-group input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: var(--dark); }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 15px; transition: 0.2s; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
         .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: #4338ca; }
+        .btn-primary:hover { background: #2563eb; }
         .btn-success { background: var(--success); color: white; }
-        .btn-danger { background: var(--danger); color: white; }
-        .auth-toggle { text-align: center; margin-top: 15px; font-size: 14px; color: #6b7280; cursor: pointer; }
-        .auth-toggle span { color: var(--primary); font-weight: bold; }
-        .user-card { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; }
-        .tabs { display: flex; gap: 8px; margin-bottom: 25px; background: #e5e7eb; padding: 4px; border-radius: 8px; }
-        .tab-btn { flex: 1; padding: 10px; border: none; background: transparent; cursor: pointer; font-weight: 600; border-radius: 6px; font-size: 14px; transition: 0.2s; }
+        .btn-success:hover { background: #059669; }
+        .toggle-auth { text-align: center; margin-top: 15px; font-size: 14px; color: #64748b; cursor: pointer; }
+        .toggle-auth span { color: var(--primary); font-weight: bold; }
+        
+        /* Thông tin thành viên */
+        .user-panel { background: linear-gradient(135deg, #1e293b, #0f172a); color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
+        .user-balance { font-size: 20px; font-weight: 700; color: #34d399; }
+        
+        /* Tabs bấm chuyển menu */
+        .tabs { display: flex; flex-wrap: wrap; gap: 5px; background: #e2e8f0; padding: 4px; border-radius: 8px; margin-bottom: 20px; }
+        .tab-btn { flex: 1; min-width: 80px; padding: 12px 5px; border: none; background: transparent; font-weight: bold; cursor: pointer; border-radius: 6px; color: #64748b; font-size: 13px; transition: 0.2s; }
         .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .grid-numbers { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; margin: 15px 0; max-height: 200px; overflow-y: auto; padding: 5px; border: 1px solid #e5e7eb; border-radius: 8px; }
-        .num-btn { padding: 8px 0; text-align: center; background: #f3f4f6; border: 1px solid #e5e7eb; cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 13px; }
-        .num-btn:hover { background: #e5e7eb; }
+        
+        /* Bàn cờ số từ 01 - 99 */
+        .grid-numbers { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; margin: 15px 0; max-height: 180px; overflow-y: auto; padding: 5px; border: 1px solid #e2e8f0; border-radius: 8px; }
+        .num-btn { padding: 8px 0; text-align: center; background: #f8fafc; border: 1px solid #e2e8f0; cursor: pointer; border-radius: 6px; font-weight: bold; font-size: 13px; transition: 0.1s; }
+        .num-btn:hover { background: #edf2f7; }
         .num-btn.selected { background: #f59e0b; color: white; border-color: #d97706; }
-        .qr-container { text-align: center; margin-top: 15px; padding: 15px; background: #fafafa; border: 2px dashed var(--primary); border-radius: 12px; display: none; }
-        .qr-image { max-width: 180px; margin-top: 10px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        
+        /* QR Nạp tiền */
+        .qr-box { text-align: center; padding: 15px; background: #f8fafc; border: 2px dashed var(--primary); border-radius: 12px; margin-top: 15px; display: none; }
+        .qr-box img { max-width: 180px; margin-top: 10px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        
+        /* Lịch sử giao dịch */
+        .history-section { margin-top: 30px; border-top: 2px dashed #cbd5e1; padding-top: 20px; }
+        .history-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; margin-bottom: 10px; font-size: 14px; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; display: inline-block; }
+        .badge-pending { background: #fef3c7; color: #d97706; }
+        .badge-win { background: #d1fae5; color: #065f46; }
+        .badge-lose { background: #fee2e2; color: #991b1b; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="auth-box">
-        <div id="login-form">
-            <h3>Đăng Nhập Shop</h3>
-            <div class="form-group">
-                <label>Tài khoản</label>
-                <input type="text" id="login-user" placeholder="Nhập tên tài khoản...">
-            </div>
-            <div class="form-group">
-                <label>Mật khẩu</label>
-                <input type="password" id="login-pass" placeholder="Nhập mật khẩu...">
-            </div>
-            <button class="btn btn-primary" onclick="handleLogin()">Đăng Nhập</button>
-            <div class="auth-toggle" onclick="toggleAuth(false)">Chưa có tài khoản? <span>Đăng ký ngay</span></div>
+    <div id="auth-area">
+        <div id="login-view">
+            <div class="form-header"><h2>Đăng Nhập Shop</h2></div>
+            <div class="form-group"><label>Tên tài khoản</label><input type="text" id="login-user" placeholder="Nhập tài khoản của bạn..."></div>
+            <div class="form-group"><label>Mật khẩu</label><input type="password" id="login-pass" placeholder="Nhập mật khẩu..."></div>
+            <button class="btn btn-primary" onclick="userLogin()">Đăng Nhập</button>
+            <div class="toggle-auth" onclick="switchAuthView(false)">Chưa có tài khoản? <span>Đăng ký ngay</span></div>
         </div>
-
-        <div id="register-form" style="display: none;">
-            <h3>Đăng Ký Tài Khoản</h3>
-            <div class="form-group">
-                <label>Tài khoản mới</label>
-                <input type="text" id="reg-user" placeholder="Tạo tên tài khoản...">
-            </div>
-            <div class="form-group">
-                <label>Mật khẩu</label>
-                <input type="password" id="reg-pass" placeholder="Tạo mật khẩu an toàn...">
-            </div>
-            <button class="btn btn-success" onclick="handleRegister()">Đăng Ký Tài Khoản</button>
-            <div class="auth-toggle" onclick="toggleAuth(true)">Đã có tài khoản? <span>Đăng nhập</span></div>
+        <div id="register-view" style="display: none;">
+            <div class="form-header"><h2>Đăng Ký Thành Viên</h2></div>
+            <div class="form-group"><label>Tên tài khoản muốn tạo</label><input type="text" id="reg-user" placeholder="Ví dụ: nguyenvanan..."></div>
+            <div class="form-group"><label>Mật khẩu bảo mật</label><input type="password" id="reg-pass" placeholder="Tạo mật khẩu..."></div>
+            <button class="btn btn-success" onclick="userRegister()">Tạo Tài Khoản</button>
+            <div class="toggle-auth" onclick="switchAuthView(true)">Đã có tài khoản? <span>Đăng nhập</span></div>
         </div>
     </div>
 
-    <div id="shop-box" style="display: none;">
-        <div class="user-card">
-            <div style="font-size: 14px; opacity: 0.9;">Xin chào, <span id="display-user" style="font-weight: bold;">...</span></div>
-            <div style="font-size: 24px; font-weight: bold; margin-top: 5px;" id="display-balance">0 VNĐ</div>
+    <div id="main-area" style="display: none;">
+        <div class="user-panel">
+            <div><div style="font-size: 13px; opacity: 0.7;">Xin chào</div><div style="font-weight: bold; font-size: 16px;" id="display-name">...</div></div>
+            <div style="text-align: right;"><div style="font-size: 13px; opacity: 0.7;">Số dư ví</div><div class="user-balance" id="display-balance">0đ</div></div>
         </div>
 
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('tab1')" id="title-tab1">Tab 1</button>
-            <button class="tab-btn" onclick="switchTab('tab2')" id="title-tab2">Tab 2</button>
-            <button class="tab-btn" onclick="switchTab('tab-nap')">Nạp Tiền</button>
-            <button class="tab-btn" onclick="switchTab('tab-rut')">Nhận Tiền</button>
+            <button class="tab-btn active" onclick="changeTab('tab1')" id="title-tab1">Tab 1</button>
+            <button class="tab-btn" onclick="changeTab('tab2')" id="title-tab2">Tab 2</button>
+            <button class="tab-btn" onclick="changeTab('tab3')" id="title-tab3">Tab 3 (Chọn Nhiều Số)</button>
+            <button class="tab-btn" onclick="changeTab('tab-deposit')">Nạp Tiền</button>
+            <button class="tab-btn" onclick="changeTab('tab-withdraw')">Rút Tiền</button>
         </div>
 
         <div id="tab1" class="tab-content active">
-            <h3>Chọn số từ 1 đến 99</h3>
-            <div class="form-group">
-                <label>Số tiền muốn đặt (VNĐ)</label>
-                <input type="number" id="money-tab1" placeholder="Nhập số tiền...">
-            </div>
-            <label>Chọn con số may mắn của bạn:</label>
+            <div class="form-group"><label>Số tiền đặt cược (VNĐ)</label><input type="number" id="money-tab1" placeholder="Nhập số tiền mua..."></div>
+            <label style="font-weight: bold; font-size: 14px;">Chọn duy nhất 1 số may mắn:</label>
             <div class="grid-numbers" id="grid-tab1"></div>
-            <button class="btn btn-primary" onclick="buyNumber('tab1')">Xác Nhận Đặt Mua</button>
+            <button class="btn btn-primary" onclick="actionBuySingle('tab1')">Xác Nhận Mua Số</button>
         </div>
 
         <div id="tab2" class="tab-content">
-            <h3>Chọn số từ 1 đến 99</h3>
-            <div class="form-group">
-                <label>Số tiền muốn đặt (VNĐ)</label>
-                <input type="number" id="money-tab2" placeholder="Nhập số tiền...">
-            </div>
-            <label>Chọn con số may mắn của bạn:</label>
+            <div class="form-group"><label>Số tiền đặt cược (VNĐ)</label><input type="number" id="money-tab2" placeholder="Nhập số tiền mua..."></div>
+            <label style="font-weight: bold; font-size: 14px;">Chọn duy nhất 1 số may mắn:</label>
             <div class="grid-numbers" id="grid-tab2"></div>
-            <button class="btn btn-primary" onclick="buyNumber('tab2')">Xác Nhận Đặt Mua</button>
+            <button class="btn btn-primary" onclick="actionBuySingle('tab2')">Xác Nhận Mua Số</button>
         </div>
 
-        <div id="tab-nap" class="tab-content">
-            <h3>Nạp Tiền Vào Tài Khoản</h3>
+        <div id="tab3" class="tab-content">
             <div class="form-group">
-                <label>Số tiền cần nạp (VNĐ)</label>
-                <input type="number" id="deposit-amount" placeholder="Nhập số tiền muốn nạp..." oninput="showQRCode()">
+                <label>Số tiền cược cho mỗi con số (VNĐ)</label>
+                <input type="number" id="money-tab3" placeholder="Nhập số tiền cho 1 số..." oninput="recalcTab3Total()">
             </div>
-            <div id="qr-area" class="qr-container">
-                <p style="margin: 0; font-weight: 600; color: #374151;">Quét mã thanh toán đúng số tiền:</p>
-                <div style="font-size: 20px; color: var(--danger); font-weight: bold; margin: 8px 0;" id="qr-money-val">0 VNĐ</div>
-                <img class="qr-image" src="https://i.postimg.cc/W3D3Yqgg/Anh-chup-man-hinh-2026-05-31-155424.png" alt="Mã QR">
+            <div style="background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; border: 1px dashed #cbd5e1;">
+                Số lượng đã chọn: <span id="tab3-count" style="font-weight:bold; color:var(--primary);">0</span> con số<br>
+                Tổng tiền cần thanh toán: <span id="tab3-total" style="font-weight:bold; color:var(--danger);">0đ</span>
             </div>
-            <button class="btn btn-success" style="margin-top: 15px;" onclick="requestDeposit()">Xác Nhận Đã Chuyển Khoản</button>
+            <label style="font-weight: bold; font-size: 14px; color: var(--success);">Bấm chọn bao nhiêu số tùy ý (01 - 99):</label>
+            <div class="grid-numbers" id="grid-tab3"></div>
+            <button class="btn btn-success" onclick="actionBuyMulti()">Xác Nhận Mua Tất Cả Số Đã Chọn</button>
         </div>
 
-        <div id="tab-rut" class="tab-content">
-            <h3>Yêu Cầu Nhận Tiền (Rút)</h3>
-            <div class="form-group">
-                <label>Số tài khoản (STK)</label>
-                <input type="text" id="withdraw-stk" placeholder="Nhập số tài khoản...">
+        <div id="tab-deposit" class="tab-content">
+            <div class="form-group"><label>Số tiền muốn nạp vào tài khoản (VNĐ)</label><input type="number" id="dep-amount" placeholder="Nhập số tiền..." oninput="updateQR()"></div>
+            <div id="qr-block" class="qr-box">
+                <span style="font-weight: bold;">Quét mã chuyển khoản đúng số tiền:</span>
+                <div style="color: var(--danger); font-weight: bold; font-size: 20px; margin: 5px 0;" id="qr-money">0đ</div>
+                <img src="https://i.postimg.cc/W3D3Yqgg/Anh-chup-man-hinh-2026-05-31-155424.png" alt="QR Code">
             </div>
+            <button class="btn btn-success" style="margin-top: 15px;" onclick="actionDeposit()">Tôi Đã Chuyển Khoản Thành Công</button>
+        </div>
+
+        <div id="tab-withdraw" class="tab-content">
             <div class="form-group">
-                <label>Ngân hàng nhận</label>
-                <input type="text" id="withdraw-bank" placeholder="Ví dụ: MB Bank, Vietcombank...">
+                <label>Chọn Ngân Hàng Nhận Tiền</label>
+                <select id="wit-bank">
+                    <option value="">-- Click chọn ngân hàng Việt Nam --</option>
+                    <option value="Vietcombank">Vietcombank (VCB)</option>
+                    <option value="MB Bank">MB Bank (Quân Đội)</option>
+                    <option value="Techcombank">Techcombank (TCB)</option>
+                    <option value="VietinBank">VietinBank</option>
+                    <option value="BIDV">BIDV</option>
+                    <option value="Agribank">Agribank</option>
+                    <option value="Sacombank">Sacombank</option>
+                    <option value="ACB">ACB (Á Châu)</option>
+                    <option value="VPBank">VPBank</option>
+                    <option value="TPBank">TPBank (Tiên Phong)</option>
+                    <option value="VIB">VIB (Quốc Tế)</option>
+                    <option value="SHB">SHB</option>
+                    <option value="HDBank">HDBank</option>
+                    <option value="Eximbank">Eximbank</option>
+                    <option value="MSB">MSB (Hàng Hải)</option>
+                    <option value="SeABank">SeABank</option>
+                    <option value="OCB">OCB (Phương Đông)</option>
+                    <option value="SCB">SCB</option>
+                    <option value="LPBank">LPBank (Bưu Điện Liên Việt)</option>
+                    <option value="BacABank">Bac A Bank</option>
+                    <option value="BVBank">BVBank (Bản Việt)</option>
+                    <option value="NamABank">Nam A Bank</option>
+                    <option value="NCB">NCB (Quốc Dân)</option>
+                    <option value="PVcomBank">PVcomBank</option>
+                    <option value="VietBank">VietBank</option>
+                    <option value="DongABank">Đông Á Bank</option>
+                    <option value="BaoVietBank">Bảo Việt Bank</option>
+                    <option value="Kienlongbank">Kienlongbank</option>
+                    <option value="SaigonBank">Saigonbank</option>
+                    <option value="GPBank">GPBank</option>
+                    <option value="OceanBank">OceanBank</option>
+                    <option value="CBBank">CBBank</option>
+                    <option value="StandardChartered">Standard Chartered</option>
+                    <option value="HSBC">HSBC Việt Nam</option>
+                    <option value="ShinhanBank">Shinhan Bank</option>
+                    <option value="Wooribank">Woori Bank</option>
+                    <option value="Momo">Ví Điện Tử MoMo</option>
+                    <option value="ZaloPay">Ví Điện Tử ZaloPay</option>
+                    <option value="ViettelMoney">Ví Viettel Money</option>
+                </select>
             </div>
-            <div class="form-group">
-                <label>Số tiền muốn rút (VNĐ)</label>
-                <input type="number" id="withdraw-amount" placeholder="Nhập số tiền...">
-            </div>
-            <button class="btn btn-danger" onclick="requestWithdraw()">Gửi Yêu Cầu Nhận Tiền</button>
+            <div class="form-group"><label>Số tài khoản nhận tiền (STK)</label><input type="text" id="wit-stk" placeholder="Nhập chuẩn xác số tài khoản..."></div>
+            <div class="form-group"><label>Họ và tên chủ thẻ</label><input type="text" id="wit-name" placeholder="Ví dụ: NGUYEN VAN A"></div>
+            <div class="form-group"><label>Số tiền muốn rút (VNĐ)</label><input type="number" id="wit-amount" placeholder="Nhập số tiền..."></div>
+            <button class="btn" style="background: var(--danger); color: white;" onclick="actionWithdraw()">Gửi Đơn Yêu Cầu Rút Tiền</button>
+        </div>
+
+        <div class="history-section">
+            <h3>Lịch Sử Đơn Hàng & Kết Quả</h3>
+            <div id="history-list">Đang kết nối đồng bộ dữ liệu...</div>
         </div>
     </div>
 </div>
 
 <script>
-    // --- DÁN ĐOẠN CONFIG CHÍNH XÁC CỦA BẠN VÀO ĐÂY ---
-   const firebaseConfig = {
+    // --- ĐOẠN CONFIG LIÊN KẾT FIREBASE CHÍNH XÁC CỦA BẠN ---
+    const firebaseConfig = {
     apiKey: "AIzaSyB7TrarB3yaNknyXMP8xw1ouG0UvM2BGTk",
     authDomain: "kinh-a64f4.firebaseapp.com",
     projectId: "kinh-a64f4",
@@ -148,127 +196,178 @@
     appId: "1:698598635550:web:7173d8b9034521fd0fd60f",
     measurementId: "G-0JF7X9KK5E"
   };
-    
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    let currentUser = "";
-    let selectedNumTab1 = null, selectedNumTab2 = null;
+    let sessionUser = "";
+    let pickNum1 = null, pickNum2 = null;
+    let pickNum3List = []; // Mảng chứa danh sách nhiều số được chọn ở Tab 3
 
+    // Đồng bộ tên các Tab từ Admin ra trang chủ
     database.ref('config/tab1-name').on('value', s => { if(s.val()) document.getElementById('title-tab1').innerText = s.val(); });
     database.ref('config/tab2-name').on('value', s => { if(s.val()) document.getElementById('title-tab2').innerText = s.val(); });
+    database.ref('config/tab3-name').on('value', s => { if(s.val()) document.getElementById('title-tab3').innerText = s.val(); });
 
-    function toggleAuth(isLogin) {
-        document.getElementById('login-form').style.display = isLogin ? 'block' : 'none';
-        document.getElementById('register-form').style.display = isLogin ? 'none' : 'block';
+    function switchAuthView(showLogin) {
+        document.getElementById('login-view').style.display = showLogin ? 'block' : 'none';
+        document.getElementById('register-view').style.display = showLogin ? 'none' : 'block';
     }
 
-    function handleRegister() {
+    function userRegister() {
         let u = document.getElementById('reg-user').value.trim();
         let p = document.getElementById('reg-pass').value.trim();
-        if(!u || !p) return alert("Vui lòng điền đủ tài khoản và mật khẩu!");
-        
-        database.ref('accounts/' + u).once('value', s => {
-            if(s.exists()) {
-                alert("Tài khoản này đã tồn tại!");
-            } else {
-                database.ref('accounts/' + u).set({ password: p, balance: 0 });
-                alert("Đăng ký thành công! Hãy đăng nhập.");
-                toggleAuth(true);
-            }
+        if(!u || !p) return alert("Vui lòng không bỏ trống tài khoản, mật khẩu!");
+        database.ref('users_db/' + u).once('value', s => {
+            if(s.exists()) return alert("Tên đăng nhập này đã có người sử dụng!");
+            database.ref('users_db/' + u).set({ password: p, balance: 0 });
+            alert("Đăng ký thành công!"); switchAuthView(true);
         });
     }
 
-    function handleLogin() {
+    function userLogin() {
         let u = document.getElementById('login-user').value.trim();
         let p = document.getElementById('login-pass').value.trim();
-        if(!u || !p) return alert("Vui lòng điền đủ thông tin!");
-
-        database.ref('accounts/' + u).once('value', s => {
+        database.ref('users_db/' + u).once('value', s => {
             if(s.exists() && s.val().password === p) {
-                currentUser = u;
-                document.getElementById('auth-box').style.display = 'none';
-                document.getElementById('shop-box').style.display = 'block';
-                document.getElementById('display-user').innerText = currentUser;
+                sessionUser = u;
+                document.getElementById('auth-area').style.display = 'none';
+                document.getElementById('main-area').style.display = 'block';
+                document.getElementById('display-name').innerText = sessionUser;
                 
-                // Theo dõi số dư liên tục
-                database.ref('accounts/' + currentUser + '/balance').on('value', snapshot => {
-                    let val = snapshot.val() || 0;
-                    document.getElementById('display-balance').innerText = Number(val).toLocaleString('vi-VN') + " VNĐ";
+                // Đồng bộ số dư thời gian thực
+                database.ref('users_db/' + sessionUser + '/balance').on('value', snap => {
+                    document.getElementById('display-balance').innerText = Number(snap.val() || 0).toLocaleString('vi-VN') + "đ";
                 });
-            } else {
-                alert("Sai tài khoản hoặc mật khẩu!");
-            }
+                loadUserHistory();
+            } else { alert("Sai tài khoản hoặc mật khẩu hệ thống!"); }
         });
     }
 
-    function generateNumbers(id, tab) {
-        let g = document.getElementById(id); g.innerHTML = "";
+    // Khởi tạo các ô bấm số tự động từ 01 đến 99
+    function createGrids() {
         for(let i=1; i<=99; i++) {
-            let b = document.createElement('button'); b.className = 'num-btn';
-            b.innerText = i < 10 ? '0'+i : i;
-            b.onclick = () => {
-                document.querySelectorAll(`#${id} .num-btn`).forEach(x => x.classList.remove('selected'));
-                b.classList.add('selected');
-                if(tab === 'tab1') selectedNumTab1 = i; else selectedNumTab2 = i;
+            let numStr = i < 10 ? '0'+i : i;
+            // Cho Tab 1 và Tab 2
+            ['tab1', 'tab2'].forEach(t => {
+                let btn = document.createElement('button'); btn.className = 'num-btn'; btn.innerText = numStr;
+                btn.onclick = () => {
+                    document.querySelectorAll(`#grid-${t} .num-btn`).forEach(x => x.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    if(t === 'tab1') pickNum1 = i; else pickNum2 = i;
+                };
+                document.getElementById(`grid-${t}`).appendChild(btn);
+            });
+            // Cho Tab 3 (Chọn không giới hạn số lượng số)
+            let btn3 = document.createElement('button'); btn3.className = 'num-btn'; btn3.innerText = numStr;
+            btn3.onclick = () => {
+                if(pickNum3List.includes(i)) {
+                    pickNum3List = pickNum3List.filter(x => x !== i); btn3.classList.remove('selected');
+                } else {
+                    pickNum3List.push(i); btn3.classList.add('selected');
+                }
+                recalcTab3Total();
             };
-            g.appendChild(b);
+            document.getElementById('grid-tab3').appendChild(btn3);
         }
     }
-    generateNumbers('grid-tab1', 'tab1'); generateNumbers('grid-tab2', 'tab2');
+    createGrids();
 
-    function switchTab(id) {
+    function recalcTab3Total() {
+        let pricePerNum = parseFloat(document.getElementById('money-tab3').value) || 0;
+        let count = pickNum3List.length;
+        document.getElementById('tab3-count').innerText = count;
+        document.getElementById('tab3-total').innerText = Number(pricePerNum * count).toLocaleString('vi-VN') + "đ";
+    }
+
+    function changeTab(id) {
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        event.currentTarget.classList.add('active');
+        document.getElementById(id).classList.add('active'); event.currentTarget.classList.add('active');
     }
 
-    function showQRCode() {
-        let a = document.getElementById('deposit-amount').value;
-        document.getElementById('qr-area').style.display = a > 0 ? 'block' : 'none';
-        document.getElementById('qr-money-val').innerText = Number(a).toLocaleString('vi-VN') + " VNĐ";
+    function updateQR() {
+        let m = document.getElementById('dep-amount').value;
+        document.getElementById('qr-block').style.display = m > 0 ? 'block' : 'none';
+        document.getElementById('qr-money').innerText = Number(m).toLocaleString('vi-VN') + "đ";
     }
 
-    function buyNumber(tab) {
+    function actionBuySingle(tab) {
         let m = document.getElementById(`money-${tab}`).value;
-        let n = tab === 'tab1' ? selectedNumTab1 : selectedNumTab2;
-        let name = document.getElementById(`title-${tab}`).innerText;
-        if(!m || !n) return alert("Vui lòng chọn số và điền số tiền!");
-        
-        database.ref('admin_logs').push({
-            user: currentUser, type: `Mua số (${name})`,
-            details: `Số đặt: ${n} - Số tiền: ${Number(m).toLocaleString('vi-VN')}đ`,
+        let n = tab === 'tab1' ? pickNum1 : pickNum2;
+        let tabName = document.getElementById(`title-${tab}`).innerText;
+        if(!m || !n) return alert("Vui lòng điền số tiền cược và click chọn số trên bảng số!");
+        database.ref('server_orders').push({
+            user: sessionUser, type: `Mua Số [${tabName}]`, details: `Số đặt: ${n < 10 ? '0'+n : n} - Tiền cược: ${Number(m).toLocaleString('vi-VN')}đ`,
             status: 'Chờ duyệt', time: new Date().toLocaleString()
         });
-        alert("Đã gửi đơn hàng lên hệ thống!");
+        alert("Đã gửi đơn hàng mua số lên hệ thống!");
     }
 
-    function requestDeposit() {
-        let a = document.getElementById('deposit-amount').value;
-        if(!a || a <= 0) return alert("Vui lòng nhập số tiền!");
-        database.ref('admin_logs').push({
-            user: currentUser, type: 'Nạp Tiền',
-            details: `Khách thông báo đã chuyển khoản: ${Number(a).toLocaleString('vi-VN')}đ`,
+    function actionBuyMulti() {
+        let price = document.getElementById('money-tab3').value;
+        let tabName = document.getElementById('title-tab3').innerText;
+        if(!price || pickNum3List.length === 0) return alert("Vui lòng điền giá tiền cược cho mỗi số và chọn các con số!");
+        let totalCash = price * pickNum3List.length;
+        let formattedNumbers = pickNum3List.map(n => n < 10 ? '0'+n : n).join(', ');
+
+        database.ref('server_orders').push({
+            user: sessionUser, type: `Mua Số [${tabName}]`, details: `Bộ số đã chọn: (${formattedNumbers}) - Số lượng: ${pickNum3List.length} số - Tiền mỗi số: ${Number(price).toLocaleString('vi-VN')}đ - Tổng tiền: ${Number(totalCash).toLocaleString('vi-VN')}đ`,
             status: 'Chờ duyệt', time: new Date().toLocaleString()
         });
-        document.getElementById('deposit-amount').value = '';
-        document.getElementById('qr-area').style.display = 'none';
-        alert("Đã thông báo cho Admin kiểm tra tài khoản!");
+        alert("Đơn hàng bộ số nhiều mục đã đẩy lên hệ thống thành công!");
     }
 
-    function requestWithdraw() {
-        let s = document.getElementById('withdraw-stk').value;
-        let b = document.getElementById('withdraw-bank').value;
-        let a = document.getElementById('withdraw-amount').value;
-        if(!s || !b || !a) return alert("Vui lòng nhập đủ thông tin!");
-        
-        database.ref('admin_logs').push({
-            user: currentUser, type: 'Rút Tiền',
-            details: `STK: ${s} - Ngân hàng: ${b} - Số tiền rút: ${Number(a).toLocaleString('vi-VN')}đ`,
+    function actionDeposit() {
+        let m = document.getElementById('dep-amount').value;
+        if(!m || m <= 0) return alert("Vui lòng điền số tiền nạp!");
+        database.ref('server_orders').push({
+            user: sessionUser, type: 'Nạp Tiền', details: `Khách báo đã chuyển khoản nạp: +${Number(m).toLocaleString('vi-VN')}đ`,
             status: 'Chờ duyệt', time: new Date().toLocaleString()
         });
-        alert("Yêu cầu rút tiền đã được gửi đi!");
+        alert("Thông báo gửi thành công, vui lòng đợi Admin duyệt tiền cộng ví!");
+    }
+
+    function actionWithdraw() {
+        let bank = document.getElementById('wit-bank').value;
+        let stk = document.getElementById('wit-stk').value.trim();
+        let name = document.getElementById('wit-name').value.trim();
+        let amount = document.getElementById('wit-amount').value;
+        if(!bank || !stk || !name || !amount) return alert("Vui lòng chọn ngân hàng và điền đủ thông tin nhận!");
+
+        database.ref('server_orders').push({
+            user: sessionUser, type: 'Rút Tiền', details: `Ngân hàng nhận: ${bank} | Số tài khoản: ${stk} | Tên: ${name} | Số tiền rút: -${Number(amount).toLocaleString('vi-VN')}đ`,
+            status: 'Chờ duyệt', time: new Date().toLocaleString()
+        });
+        alert("Đã gửi lệnh rút tiền đi thành công!");
+    }
+
+    // Hàm nhận dữ liệu lịch sử và thay đổi trạng thái theo nút bấm Admin thời gian thực
+    function loadUserHistory() {
+        database.ref('server_orders').on('value', snap => {
+            let data = snap.val();
+            let box = document.getElementById('history-list'); box.innerHTML = "";
+            if(!data) { box.innerText = "Chưa có dữ liệu hoạt động."; return; }
+            
+            Object.keys(data).reverse().forEach(key => {
+                let o = data[key];
+                if(o.user === sessionUser) {
+                    let badgeClass = 'badge-pending';
+                    if(o.status === 'Trúng Giải 🎉' || o.status === 'Đã Duyệt Rút' || o.status === 'Đã Duyệt Nạp') badgeClass = 'badge-win';
+                    if(o.status === 'Trượt Giải ❌') badgeClass = 'badge-lose';
+                    
+                    let card = document.createElement('div'); card.className = 'history-card';
+                    card.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                            <strong>${o.type}</strong> <small style="color:#64748b">${o.time}</small>
+                        </div>
+                        <div style="color:#475569; font-size:13px; margin-bottom:5px;">${o.details}</div>
+                        <div>Kết quả duyệt: <span class="badge ${badgeClass}">${o.status}</span></div>
+                    `;
+                    box.appendChild(card);
+                }
+            });
+            if(box.innerHTML === "") box.innerText = "Chưa có dữ liệu lịch sử hoạt động.";
+        });
     }
 </script>
 </body>
