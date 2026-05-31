@@ -2,41 +2,44 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Bảng Điều Khiển Admin (Firebase Cloud)</title>
+    <title>Hệ Thống Quản Lý Admin Cao Cấp</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; background: #2c3e50; color: white; padding: 20px; }
-        .admin-box { max-width: 1000px; margin: 0 auto; background: #34495e; padding: 20px; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; color: black; }
-        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
-        th { background: #007bff; color: white; }
-        .config-section { background: #1a252f; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
-        .btn-action { padding: 5px 10px; background: #28a745; color: white; border: none; cursor: pointer; border-radius: 3px; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #1e293b; color: #f8fafc; padding: 30px; margin: 0; }
+        .admin-box { max-width: 1100px; margin: 0 auto; background: #0f172a; padding: 30px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #1e293b; border-radius: 8px; overflow: hidden; }
+        th, td { padding: 14px; border-bottom: 1px solid #334155; text-align: left; color: #cbd5e1; }
+        th { background: #3b82f6; color: white; font-weight: 600; }
+        .config-section { background: #1e293b; padding: 20px; border-radius: 10px; margin-bottom: 25px; border: 1px solid #334155; }
+        .config-section input { padding: 8px 12px; border: 1px solid #475569; background: #0f172a; color: white; border-radius: 6px; }
+        .config-section button { padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-action { padding: 6px 12px; background: #10b981; color: white; border: none; cursor: pointer; border-radius: 6px; font-weight: bold; }
+        .btn-action:hover { background: #059669; }
     </style>
 </head>
 <body>
 
 <div class="admin-box">
-    <h2>HỆ THỐNG QUẢN LÝ ADMIN (KẾT NỐI REALTIME)</h2>
+    <h2>BẢNG ĐIỀU KHIỂN QUẢN TRỊ VIÊN</h2>
 
     <div class="config-section">
-        <h3>Thay Đổi Tên Tab Khách Hàng</h3>
-        <label>Tên Tab 1:</label> <input type="text" id="admin-tab1-name" placeholder="Tab 1...">
-        <label style="margin-left: 20px;">Tên Tab 2:</label> <input type="text" id="admin-tab2-name" placeholder="Tab 2...">
-        <button onclick="saveTabNames()" style="padding: 5px 10px; margin-left: 10px; cursor: pointer;">Cập Nhật Tab</button>
+        <h3>Cấu Hình Đổi Tên Tab Khách Hàng</h3>
+        <label>Tên Tab 1: </label> <input type="text" id="admin-tab1-name">
+        <label style="margin-left: 20px;">Tên Tab 2: </label> <input type="text" id="admin-tab2-name">
+        <button onclick="saveTabNames()" style="margin-left: 15px;">Cập Nhật Ngay</button>
     </div>
 
-    <h3>Danh Sách Thông Báo & Đơn Hàng</h3>
+    <h3>Thông Báo Hệ Thống (Thời Gian Thực)</h3>
     <table>
         <thead>
             <tr>
                 <th>Thời Gian</th>
                 <th>Khách Hàng</th>
-                <th>Hành Động</th>
-                <th>Nội Dung Chi Tiết</th>
+                <th>Loại Yêu Cầu</th>
+                <th>Thông Tin Chi Tiết</th>
                 <th>Trạng Thái</th>
-                <th>Nhập Tiền Xác Nhận</th>
+                <th>Nhập Số Tiền Xác Nhận</th>
             </tr>
         </thead>
         <tbody id="log-table-body"></tbody>
@@ -44,10 +47,8 @@
 </div>
 
 <script>
-    // ========================================================
-    // ĐOẠN DƯỚI NÀY BẠN DÁN ĐOẠN CONFIG GIỐNG HỆT NHƯ FILE INDEX.HTML
-    // ========================================================
-    const firebaseConfig = {
+    // --- DÁN ĐOẠN CONFIG GIỐNG HỆT NHƯ TRÊN FILE INDEX.HTML VÀO ĐÂY ---
+   const firebaseConfig = {
     apiKey: "AIzaSyB7TrarB3yaNknyXMP8xw1ouG0UvM2BGTk",
     authDomain: "kinh-a64f4.firebaseapp.com",
     projectId: "kinh-a64f4",
@@ -56,17 +57,15 @@
     appId: "1:698598635550:web:7173d8b9034521fd0fd60f",
     measurementId: "G-0JF7X9KK5E"
   };
-    // ========================================================
 
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    // Đồng bộ tên Tab hiện tại lên ô cấu hình Admin
-    database.ref('config').once('value', (snapshot) => {
-        let data = snapshot.val();
-        if(data) {
-            if(data['tab1-name']) document.getElementById('admin-tab1-name').value = data['tab1-name'];
-            if(data['tab2-name']) document.getElementById('admin-tab2-name').value = data['tab2-name'];
+    database.ref('config').once('value', s => {
+        let d = s.val();
+        if(d) {
+            if(d['tab1-name']) document.getElementById('admin-tab1-name').value = d['tab1-name'];
+            if(d['tab2-name']) document.getElementById('admin-tab2-name').value = d['tab2-name'];
         }
     });
 
@@ -74,30 +73,30 @@
         let t1 = document.getElementById('admin-tab1-name').value;
         let t2 = document.getElementById('admin-tab2-name').value;
         database.ref('config').update({ 'tab1-name': t1, 'tab2-name': t2 });
-        alert("Tên Tab đã đồng bộ thành công sang trang khách!");
+        alert("Đã cập nhật tên tab!");
     }
 
-    // Nhận thông báo tự động (Thời gian thực)
-    database.ref('admin_logs').on('value', (snapshot) => {
-        let logsData = snapshot.val();
+    // Nhận thông báo liên tục từ khách hàng gửi lên
+    database.ref('admin_logs').on('value', snapshot => {
+        let logs = snapshot.val();
         let tbody = document.getElementById('log-table-body');
         tbody.innerHTML = "";
 
-        if(logsData) {
-            Object.keys(logsData).reverse().forEach((key) => {
-                let log = logsData[key];
+        if(logs) {
+            Object.keys(logs).reverse().forEach(key => {
+                let log = logs[key];
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><small>${log.time || ''}</small></td>
                     <td><b>${log.user}</b></td>
-                    <td style="color: #ffc107">${log.type}</td>
+                    <td style="color: #f59e0b">${log.type}</td>
                     <td>${log.details}</td>
-                    <td style="color: ${log.status === 'Chờ duyệt' ? 'orange' : '#28a745'}"><b>${log.status}</b></td>
+                    <td style="color: ${log.status === 'Chờ duyệt' ? '#f97316' : '#10b981'}"><b>${log.status}</b></td>
                     <td>
                         ${log.status === 'Chờ duyệt' ? `
-                            <input type="number" id="amount-${key}" placeholder="Điền số tiền cộng..." style="width:130px; padding:4px;">
+                            <input type="number" id="amount-${key}" placeholder="Số tiền..." style="width:110px; padding:6px; border-radius:4px; border:none;">
                             <button class="btn-action" onclick="approveAction('${key}', '${log.user}')">Xác Nhận</button>
-                        ` : '<span style="color:green">✔ Đã xử lý</span>'}
+                        ` : '<span style="color:#10b981">✔ Đã xử lý hoàn tất</span>'}
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -106,26 +105,26 @@
     });
 
     function approveAction(key, username) {
-        let amountInput = document.getElementById(`amount-${key}`).value;
-        if(!amountInput || amountInput <= 0) return alert("Vui lòng nhập số tiền muốn cộng cho khách!");
+        let valInput = document.getElementById(`amount-${key}`).value;
+        if(!valInput || valInput <= 0) return alert("Vui lòng nhập tiền!");
 
-        let moneyToAdd = parseFloat(amountInput);
+        let moneyToAdd = parseFloat(valInput);
 
-        // Lấy số tiền trên Cloud hiện tại của người này và cộng dồn thêm
-        database.ref('users/' + username).once('value', (snapshot) => {
+        // Đọc số dư ví tài khoản khoản khách hàng tại nhánh accounts
+        database.ref('accounts/' + username + '/balance').once('value', snapshot => {
             let currentBalance = snapshot.val() || 0;
             let newBalance = currentBalance + moneyToAdd;
 
-            // 1. Lưu số tiền mới lên Cloud
-            database.ref('users/' + username).set(newBalance);
+            // 1. Cộng dồn tiền vào tài khoản
+            database.ref('accounts/' + username).update({ balance: newBalance });
 
-            // 2. Cập nhật lại thông báo đơn hàng thành Đã Duyệt
+            // 2. Chuyển trạng thái đơn hàng sang hoàn tất
             database.ref('admin_logs/' + key).update({
                 status: 'Đã Xác Nhận',
-                details: `[Hoàn Tất] Đã cộng: +${moneyToAdd.toLocaleString('vi-VN')} VNĐ`
+                details: `[Hoàn Tất] Đã duyệt số tiền: +${moneyToAdd.toLocaleString('vi-VN')} VNĐ`
             });
 
-            alert(`Thành công! Đã xử lý đơn và cộng ${moneyToAdd.toLocaleString('vi-VN')}đ cho tài khoản: ${username}`);
+            alert(`Đã cộng ${moneyToAdd.toLocaleString('vi-VN')}đ thành công cho ví tài khoản: ${username}`);
         });
     }
 </script>
