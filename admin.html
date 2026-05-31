@@ -10,43 +10,33 @@
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; padding: 25px; margin: 0; }
         .wrapper { max-width: 1250px; margin: 0 auto; background: #1e293b; padding: 25px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         h2 { border-bottom: 2px solid #3b82f6; padding-bottom: 10px; color: white; margin-top: 0; font-size: 24px; }
-        
-        /* Cấu hình đổi tên tab */
         .setting-box { background: #334155; padding: 15px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #475569; }
         .setting-box h3 { margin-top: 0; font-size: 16px; color: #38bdf8; }
         .setting-box input { padding: 8px; border-radius: 4px; border: none; margin-right: 10px; width: 140px; background: #1e293b; color: white; border: 1px solid #475569; }
-        .setting-box button { padding: 8px 15px; background: #3b82f6; border: none; color: white; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .setting-box button:hover { background: #2563eb; }
-        
-        /* Bộ điều hướng Tabs của Admin */
+        .setting-box button { padding: 8px 15px; background: #3b82f6; border: none; color: white; border-radius: 4px; font-weight: bold; cursor: pointer; }
         .admin-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #334155; padding-bottom: 10px; }
-        .admin-tab-btn { padding: 10px 20px; background: #334155; border: none; color: #94a3b8; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.2s; }
+        .admin-tab-btn { padding: 10px 20px; background: #334155; border: none; color: #94a3b8; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px; }
         .admin-tab-btn.active { background: #3b82f6; color: white; }
         .admin-tab-content { display: none; }
         .admin-tab-content.active { display: block; }
-        
-        /* Bảng dữ liệu */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #1e293b; font-size: 14px; border-radius: 8px; overflow: hidden; }
         th, td { padding: 14px 12px; border: 1px solid #334155; text-align: left; }
         th { background: #3b82f6; color: white; font-weight: 600; }
         tr:hover { background: #243249; }
-        
-        /* Các nút bấm thao tác nhanh không cần nhập tiền */
-        .btn-action { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 13px; }
+        .btn-action { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; }
         .btn-win { background: #10b981; color: white; }
         .btn-win:hover { background: #059669; }
         .btn-lose { background: #ef4444; color: white; margin-left: 5px; }
         .btn-lose:hover { background: #dc2626; }
         .btn-money { background: #a855f7; color: white; }
         .btn-money:hover { background: #9333ea; }
-        
         .status-badge { padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="wrapper">
-    <h2>BẢNG ĐIỀU KHIỂN QUẢN TRỊ VIÊN (ADMIN v2.0)</h2>
+    <h2>BẢNG ĐIỀU KHIỂN QUẢN TRỊ VIÊN (ADMIN v2.1)</h2>
 
     <div class="setting-box">
         <h3>Cấu Hình Đổi Tên Thẻ (Tabs) Bên Trang Khách</h3>
@@ -101,7 +91,6 @@
 </div>
 
 <script>
-    // --- CẤU HÌNH LIÊN KẾT FIREBASE CHÍNH XÁC CỦA BẠN ---
     const firebaseConfig = {
     apiKey: "AIzaSyB7TrarB3yaNknyXMP8xw1ouG0UvM2BGTk",
     authDomain: "kinh-a64f4.firebaseapp.com",
@@ -115,7 +104,6 @@
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    // Lấy tên cấu hình tab cũ lên ô nhập dữ liệu
     database.ref('config').once('value', s => {
         let d = s.val();
         if(d) {
@@ -133,7 +121,6 @@
         alert("Đã cập nhật tên các tab ra trang chủ khách hàng!");
     }
 
-    // Hàm chuyển đổi tab mượt mà của Admin
     function switchAdminTab(tabId) {
         document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
@@ -141,7 +128,6 @@
         event.currentTarget.classList.add('active');
     }
 
-    // --- LẮNG NGHE VÀ PHÂN CHIA DỮ LIỆU TỰ ĐỘNG LÊN 2 TABS BIỂU DIỄN ---
     database.ref('server_orders').on('value', snap => {
         let allOrders = snap.val();
         let numBody = document.getElementById('table-numbers-body');
@@ -162,7 +148,6 @@
             let item = allOrders[key];
             let isPending = item.status === 'Chờ duyệt';
             
-            // Khởi tạo hàng dữ liệu HTML
             let tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><small style="color:#94a3b8">${item.time}</small></td>
@@ -172,7 +157,6 @@
                 <td><span class="status-badge" style="background:${isPending ? '#7c2d12':'#064e3b'}; color:${isPending ? '#fdba74':'#34d399'}">${item.status}</span></td>
             `;
 
-            // PHÂN LOẠI 1: Nếu là đơn Mua Số -> Đẩy vào Tab Duyệt Số
             if (item.type.includes('Mua Số')) {
                 hasNum = true;
                 let actionTd = document.createElement('td');
@@ -187,7 +171,6 @@
                 tr.appendChild(actionTd);
                 numBody.appendChild(tr);
             } 
-            // PHÂN LOẠI 2: Nếu là đơn Nạp / Rút Tiền -> Đẩy vào Tab Tiền Tệ
             else if (item.type === 'Nạp Tiền' || item.type === 'Rút Tiền') {
                 hasMoney = true;
                 let actionTd = document.createElement('td');
@@ -214,7 +197,7 @@
         if(!hasMoney) moneyBody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#64748b">Không có yêu cầu nạp rút nào</td></tr>`;
     });
 
-    // --- LOGIC XỬ LÝ 1-CHẠM: KHÔNG CẦN NHẬP SỐ TIỀN THỦ CÔNG ---
+    // --- LOGIC ĐÃ ĐƯỢC FIX LỖI CHẠN NÚT BẤM ---
     function executeAdminAction(key, user, mode, betAmount) {
         database.ref('users_db/' + user + '/balance').once('value', snap => {
             let currentBalance = snap.val() || 0;
@@ -223,63 +206,39 @@
             let logDetailsUpdate = "";
 
             if (mode === 'win') {
-                // TỰ ĐỘNG TÍNH TOÁN: Lấy số tiền khách cược nhân đôi (x2) cộng trực tiếp vào ví
                 let winBonus = betAmount * 2;
                 finalBalance += winBonus;
                 logStatus = 'Trúng Giải 🎉';
-                logDetailsUpdate = `[KẾT QUẢ]: Trúng giải! Tiền cược gốc ${betAmount.toLocaleString('vi-VN')}đ được nhân đôi thành công: +${winBonus.toLocaleString('vi-VN')}đ vào tài khoản.`;
+                logDetailsUpdate = `[KẾT QUẢ]: Trúng giải! Tiền cược gốc ${betAmount.toLocaleString('vi-VN')}đ được nhân đôi: +${winBonus.toLocaleString('vi-VN')}đ vào tài khoản.`;
             } 
             else if (mode === 'lose') {
-                // Khách trượt giải: Tiền gốc đã trừ từ trước lúc mua nên chỉ cần chuyển đổi trạng thái đóng lệnh đơn hàng
                 logStatus = 'Trượt Giải ❌';
                 logDetailsUpdate = `[KẾT QUẢ]: Không trúng giải thưởng.`;
             } 
             else if (mode === 'deposit-ok') {
-                // TỰ ĐỘNG NẠP: Đọc chuỗi tin nhắn lấy số tiền nạp để tự động cộng ví, không cần gõ
-                database.ref('server_orders/' + key + '/details').once('value', detailsSnap => {
-                    let text = detailsSnap.val() || "";
-                    let parsedMoney = 0;
-                    // Trích xuất số tiền từ text thông báo nạp tiền
-                    let match = text.match(/\+([0-9.,]+)/);
-                    if(match) {
-                        parsedMoney = parseFloat(match[1].replace(/[\.,]/g, ''));
-                    }
-                    if(parsedMoney <= 0) {
-                        let manual = prompt("Không trích xuất được tiền tự động từ tin nhắn, vui lòng nhập số tiền thực nạp:");
-                        if(!manual) return;
-                        parsedMoney = parseFloat(manual);
-                    }
-                    
-                    finalBalance += parsedMoney;
-                    database.ref('users_db/' + user).update({ balance: finalBalance });
-                    database.ref('server_orders/' + key).update({
-                        status: 'Đã Duyệt Nạp',
-                        details: `[Nạp Tiền]: Đã duyệt cộng ví thành công +${parsedMoney.toLocaleString('vi-VN')}đ vào tài khoản.`
-                    });
-                    alert(`Đã nạp thành công +${parsedMoney.toLocaleString('vi-VN')}đ cho tài khoản ${user}!`);
-                });
-                return; // Thoát ra vì xử lý riêng cho nạp tiền
+                // Tự động lấy trực tiếp betAmount từ trang chủ truyền sang để cộng ví
+                finalBalance += betAmount;
+                logStatus = 'Đã Duyệt Nạp';
+                logDetailsUpdate = `[Nạp Tiền]: Đã duyệt cộng ví thành công +${betAmount.toLocaleString('vi-VN')}đ vào tài khoản.`;
             } 
             else if (mode === 'withdraw-ok') {
-                // Khách rút tiền thành công: Tiền đã trừ/giam trước đó, chỉ cần đổi trạng thái kết quả đơn
                 logStatus = 'Đã Duyệt Rút';
-                logDetailsUpdate = `[Rút Tiền]: Admin đã hoàn tất chuyển khoản ngân hàng số tiền -${betAmount.toLocaleString('vi-VN')}đ.`;
+                logDetailsUpdate = `[Rút Tiền]: Admin đã hoàn tất chuyển khoản số tiền -${betAmount.toLocaleString('vi-VN')}đ.`;
             } 
             else if (mode === 'withdraw-cancel') {
-                // Admin hủy đơn rút tiền: Hoàn lại tiền cược gốc vào ví cho khách
                 finalBalance += betAmount;
                 logStatus = 'Từ Chối Rút ❌';
                 logDetailsUpdate = `[Từ chối rút]: Hủy lệnh rút. Hệ thống hoàn lại tiền gốc +${betAmount.toLocaleString('vi-VN')}đ vào ví khách.`;
             }
 
-            // Đồng bộ cập nhật lên hệ thống Database chính
+            // Cập nhật đồng loạt lên Firebase Database
             database.ref('users_db/' + user).update({ balance: finalBalance });
             database.ref('server_orders/' + key).update({
                 status: logStatus,
                 details: logDetailsUpdate
             });
 
-            alert(`Đã phê duyệt xong đơn hàng cho tài khoản: ${user}!`);
+            alert(`Hệ thống đã phê duyệt thành công yêu cầu này!`);
         });
     }
 </script>
