@@ -1,1 +1,1 @@
-# ki-m-ti-n-kh-s-ch
+kiếm tiền không sạch
