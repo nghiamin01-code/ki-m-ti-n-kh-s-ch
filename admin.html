@@ -2,53 +2,58 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Hệ Thống Quản Lý Admin Cao Cấp</title>
+    <title>Hệ Thống Quản Lý Admin Chuyên Nghiệp</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #1e293b; color: #f8fafc; padding: 30px; margin: 0; }
-        .admin-box { max-width: 1100px; margin: 0 auto; background: #0f172a; padding: 30px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #1e293b; border-radius: 8px; overflow: hidden; }
-        th, td { padding: 14px; border-bottom: 1px solid #334155; text-align: left; color: #cbd5e1; }
-        th { background: #3b82f6; color: white; font-weight: 600; }
-        .config-section { background: #1e293b; padding: 20px; border-radius: 10px; margin-bottom: 25px; border: 1px solid #334155; }
-        .config-section input { padding: 8px 12px; border: 1px solid #475569; background: #0f172a; color: white; border-radius: 6px; }
-        .config-section button { padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .btn-action { padding: 6px 12px; background: #10b981; color: white; border: none; cursor: pointer; border-radius: 6px; font-weight: bold; }
-        .btn-action:hover { background: #059669; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; padding: 25px; margin: 0; }
+        .wrapper { max-width: 1200px; margin: 0 auto; background: #1e293b; padding: 25px; border-radius: 12px; }
+        h2 { border-bottom: 2px solid #3b82f6; padding-bottom: 10px; color: white; margin-top: 0; }
+        .setting-box { background: #334155; padding: 15px; border-radius: 8px; margin-bottom: 25px; }
+        .setting-box input { padding: 8px; border-radius: 4px; border: none; margin-right: 10px; width: 140px; }
+        .setting-box button { padding: 8px 15px; background: #3b82f6; border: none; color: white; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #1e293b; font-size: 14px; }
+        th, td { padding: 12px; border: 1px solid #334155; text-align: left; }
+        th { background: #3b82f6; color: white; }
+        .btn-win { padding: 5px 10px; background: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-lose { padding: 5px 10px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 3px; }
+        .btn-withdraw { padding: 6px 12px; background: #a855f7; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .input-money { padding: 6px; width: 120px; border-radius: 4px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold; }
+        .status-pending { color: #f59e0b; font-weight: bold; }
+        .status-done { color: #10b981; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="admin-box">
+<div class="wrapper">
     <h2>BẢNG ĐIỀU KHIỂN QUẢN TRỊ VIÊN</h2>
 
-    <div class="config-section">
-        <h3>Cấu Hình Đổi Tên Tab Khách Hàng</h3>
-        <label>Tên Tab 1: </label> <input type="text" id="admin-tab1-name">
-        <label style="margin-left: 20px;">Tên Tab 2: </label> <input type="text" id="admin-tab2-name">
-        <button onclick="saveTabNames()" style="margin-left: 15px;">Cập Nhật Ngay</button>
+    <div class="setting-box">
+        <h3>Cấu Hình Đổi Tên Cả 3 Thẻ (Tabs) Khách Hàng</h3>
+        <label>Tab 1: </label><input type="text" id="input-t1">
+        <label>Tab 2: </label><input type="text" id="input-t2">
+        <label>Tab 3: </label><input type="text" id="input-t3">
+        <button onclick="updateTabs()">Cập Nhật Giao Diện</button>
     </div>
 
-    <h3>Thông Báo Hệ Thống (Thời Gian Thực)</h3>
+    <h3>Danh Sách Đơn Từ Hệ Thống</h3>
     <table>
         <thead>
             <tr>
                 <th>Thời Gian</th>
-                <th>Khách Hàng</th>
+                <th>Tài Khoản</th>
                 <th>Loại Yêu Cầu</th>
-                <th>Thông Tin Chi Tiết</th>
+                <th>Nội Dung Chi Tiết Đơn Hàng</th>
                 <th>Trạng Thái</th>
-                <th>Nhập Số Tiền Xác Nhận</th>
+                <th>Hành Động Xử Lý Đơn Của Admin</th>
             </tr>
         </thead>
-        <tbody id="log-table-body"></tbody>
+        <tbody id="order-list"></tbody>
     </table>
 </div>
 
 <script>
-    // --- DÁN ĐOẠN CONFIG GIỐNG HỆT NHƯ TRÊN FILE INDEX.HTML VÀO ĐÂY ---
-   const firebaseConfig = {
+    const firebaseConfig = {
     apiKey: "AIzaSyB7TrarB3yaNknyXMP8xw1ouG0UvM2BGTk",
     authDomain: "kinh-a64f4.firebaseapp.com",
     projectId: "kinh-a64f4",
@@ -64,67 +69,107 @@
     database.ref('config').once('value', s => {
         let d = s.val();
         if(d) {
-            if(d['tab1-name']) document.getElementById('admin-tab1-name').value = d['tab1-name'];
-            if(d['tab2-name']) document.getElementById('admin-tab2-name').value = d['tab2-name'];
+            document.getElementById('input-t1').value = d['tab1-name'] || "Tab 1";
+            document.getElementById('input-t2').value = d['tab2-name'] || "Tab 2";
+            document.getElementById('input-t3').value = d['tab3-name'] || "Tab 3 (Nhiều Số)";
         }
     });
 
-    function saveTabNames() {
-        let t1 = document.getElementById('admin-tab1-name').value;
-        let t2 = document.getElementById('admin-tab2-name').value;
-        database.ref('config').update({ 'tab1-name': t1, 'tab2-name': t2 });
-        alert("Đã cập nhật tên tab!");
+    function updateTabs() {
+        let t1 = document.getElementById('input-t1').value;
+        let t2 = document.getElementById('input-t2').value;
+        let t3 = document.getElementById('input-t3').value;
+        database.ref('config').update({ 'tab1-name': t1, 'tab2-name': t2, 'tab3-name': t3 });
+        alert("Đã đổi tên 3 tab thành công!");
     }
 
-    // Nhận thông báo liên tục từ khách hàng gửi lên
-    database.ref('admin_logs').on('value', snapshot => {
-        let logs = snapshot.val();
-        let tbody = document.getElementById('log-table-body');
-        tbody.innerHTML = "";
+    database.ref('server_orders').on('value', snap => {
+        let list = snap.val();
+        let htmlBody = document.getElementById('order-list'); htmlBody.innerHTML = "";
+        if(!list) return;
 
-        if(logs) {
-            Object.keys(logs).reverse().forEach(key => {
-                let log = logs[key];
-                let tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><small>${log.time || ''}</small></td>
-                    <td><b>${log.user}</b></td>
-                    <td style="color: #f59e0b">${log.type}</td>
-                    <td>${log.details}</td>
-                    <td style="color: ${log.status === 'Chờ duyệt' ? '#f97316' : '#10b981'}"><b>${log.status}</b></td>
-                    <td>
-                        ${log.status === 'Chờ duyệt' ? `
-                            <input type="number" id="amount-${key}" placeholder="Số tiền..." style="width:110px; padding:6px; border-radius:4px; border:none;">
-                            <button class="btn-action" onclick="approveAction('${key}', '${log.user}')">Xác Nhận</button>
-                        ` : '<span style="color:#10b981">✔ Đã xử lý hoàn tất</span>'}
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
+        Object.keys(list).reverse().forEach(key => {
+            let item = list[key];
+            let isPending = item.status === 'Chờ duyệt';
+            let tr = document.createElement('tr');
+            
+            let actionHtml = '';
+            if(isPending) {
+                if(item.type.includes('Mua Số')) {
+                    actionHtml = `
+                        <input type="number" id="pay-${key}" class="input-money" placeholder="Nhập gốc tiền cược..."><br><br>
+                        <button class="btn-win" onclick="processOrder('${key}', '${item.user}', 'win')">Xác Nhận TRÚNG (x2 Ví)</button>
+                        <button class="btn-lose" onclick="processOrder('${key}', '${item.user}', 'lose')">Xác Nhận TRƯỢT</button>
+                    `;
+                } else if(item.type === 'Nạp Tiền') {
+                    actionHtml = `
+                        <input type="number" id="pay-${key}" class="input-money" placeholder="Nhập số tiền nạp..."><br><br>
+                        <button class="btn-win" onclick="processOrder('${key}', '${item.user}', 'deposit')">Xác Nhận Đã Nhận Tiền</button>
+                    `;
+                } else if(item.type === 'Rút Tiền') {
+                    actionHtml = `
+                        <input type="number" id="pay-${key}" class="input-money" placeholder="Nhập số tiền trừ..."><br><br>
+                        <button class="btn-withdraw" onclick="processOrder('${key}', '${item.user}', 'withdraw')">Xác Nhận Đã Chuyển Tiền</button>
+                    `;
+                }
+            } else {
+                actionHtml = `<span style="color:#10b981; font-weight:bold;">✔ Lệnh Đã Đóng</span>`;
+            }
+
+            tr.innerHTML = `
+                <td><small>${item.time}</small></td>
+                <td><b>${item.user}</b></td>
+                <td style="color:#60a5fa">${item.type}</td>
+                <td>${item.details}</td>
+                <td style="color:${isPending ? '#f59e0b':'#10b981'}"><b>${item.status}</b></td>
+                <td>${actionHtml}</td>
+            `;
+            htmlBody.appendChild(tr);
+        });
     });
 
-    function approveAction(key, username) {
-        let valInput = document.getElementById(`amount-${key}`).value;
-        if(!valInput || valInput <= 0) return alert("Vui lòng nhập tiền!");
+    function processOrder(key, user, mode) {
+        let cashInput = document.getElementById(`pay-${key}`).value;
+        if(!cashInput || cashInput <= 0) return alert("Vui lòng điền số tiền xử lý!");
+        let targetMoney = parseFloat(cashInput);
 
-        let moneyToAdd = parseFloat(valInput);
+        database.ref('users_db/' + user + '/balance').once('value', snap => {
+            let current = snap.val() || 0;
+            let finalBalance = current;
+            let logStatus = "";
+            let logDetailsUpdate = "";
 
-        // Đọc số dư ví tài khoản khoản khách hàng tại nhánh accounts
-        database.ref('accounts/' + username + '/balance').once('value', snapshot => {
-            let currentBalance = snapshot.val() || 0;
-            let newBalance = currentBalance + moneyToAdd;
+            if (mode === 'win') {
+                // TỰ ĐỘNG NHÂN ĐÔI SỐ TIỀN CƯỢC KHI TRÚNG GIẢI
+                let winBonus = targetMoney * 2; 
+                finalBalance += winBonus;
+                logStatus = 'Trúng Giải 🎉';
+                logDetailsUpdate = `[TRÚNG THƯỞNG] Gốc cược: ${targetMoney.toLocaleString('vi-VN')}đ x2 = +${winBonus.toLocaleString('vi-VN')}đ vào tài khoản.`;
+            } else if (mode === 'deposit') {
+                finalBalance += targetMoney;
+                logStatus = 'Đã Duyệt Nạp';
+                logDetailsUpdate = `[Thành công] Đã duyệt nạp: +${targetMoney.toLocaleString('vi-VN')}đ.`;
+            } else if (mode === 'lose') {
+                logStatus = 'Trượt Giải ❌';
+                logDetailsUpdate = `[Không Trúng] Đơn mua số không trúng thưởng.`;
+            } else if (mode === 'withdraw') {
+                finalBalance -= targetMoney;
+                logStatus = 'Đã Duyệt Rút';
+                logDetailsUpdate = `[Thành công] Đã chuyển khoản thành công: -${targetMoney.toLocaleString('vi-VN')}đ.`;
+            }
 
-            // 1. Cộng dồn tiền vào tài khoản
-            database.ref('accounts/' + username).update({ balance: newBalance });
-
-            // 2. Chuyển trạng thái đơn hàng sang hoàn tất
-            database.ref('admin_logs/' + key).update({
-                status: 'Đã Xác Nhận',
-                details: `[Hoàn Tất] Đã duyệt số tiền: +${moneyToAdd.toLocaleString('vi-VN')} VNĐ`
+            // Đồng bộ cập nhật lên hệ thống cơ sở dữ liệu
+            database.ref('users_db/' + user).update({ balance: finalBalance });
+            database.ref('server_orders/' + key).update({
+                status: logStatus,
+                details: logDetailsUpdate
             });
 
-            alert(`Đã cộng ${moneyToAdd.toLocaleString('vi-VN')}đ thành công cho ví tài khoản: ${username}`);
+            if (mode === 'win') {
+                alert(`Đơn hàng của ${user} đã được duyệt TRÚNG! Hệ thống tự động x2 tiền cược và cộng ${ (targetMoney * 2).toLocaleString('vi-VN') }đ vào ví.`);
+            } else {
+                alert(`Hệ thống đã cập nhật thành công giao dịch cho tài khoản ${user}!`);
+            }
         });
     }
 </script>
